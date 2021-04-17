@@ -43,7 +43,7 @@ def get_homework_statuses(current_timestamp):
         homework_statuses = requests.get(
             PRAKTIKUM_URL,
             headers={'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'},
-            params={'from_date': 0})
+            params={'from_date': current_timestamp})
     except ValueError as e:
         logging.error(e, exc_info=True)
     except requests.HTTPError as e:
