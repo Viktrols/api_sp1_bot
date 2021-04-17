@@ -5,49 +5,56 @@ import telegram
 import time
 
 from dotenv import load_dotenv
-from logging.handlers import RotatingFileHandler
 
-
-load_dotenv()
 
 logging.basicConfig(
     level=logging.DEBUG,
-    filename='logs.log',
     format='%(asctime)s, %(levelname)s, %(message)s, %(name)s')
-logger = logging.getLogger('__name__')
-logger.setLevel(logging.INFO)
-handler = RotatingFileHandler('my_logger.log', maxBytes=50000000,
-                              backupCount=5)
-logger.addHandler(handler)
+
+load_dotenv()
 
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
+HOMEWORK_STATUSES = {
+    'reviewing': 'Работа еще проверяется.',
+    'rejected': 'К сожалению в работе нашлись ошибки.',
+    'approved': ('Ревьюеру всё понравилось, '
+                 'можно приступать к следующему уроку.')}
 
 
 def parse_homework_status(homework):
     homework_name = homework.get('homework_name')
     status = homework.get('status')
-    if status == 'rejected':
-        verdict = 'К сожалению в работе нашлись ошибки.'
-    elif status == 'approved':
-        verdict = ('Ревьюеру всё понравилось, '
-                   'можно приступать к следующему уроку.')
+    if status is None or status not in HOMEWORK_STATUSES:
+        return 'Домашка не найдена или статус неизвестен'
+    if status == 'reviewing':
+        return f'Работа "{homework_name}" еще проверяется'
     else:
-        return f'Работа {homework_name} еще проверяется'
-    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+        return (f'У вас проверили работу "{homework_name}"!\n\n'
+                f'{HOMEWORK_STATUSES[status]}')
 
 
 def get_homework_statuses(current_timestamp):
+    if current_timestamp is None:
+        current_timestamp = int(time.time())
     try:
         homework_statuses = requests.get(
             PRAKTIKUM_URL,
             headers={'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'},
-            params={'from_date': current_timestamp})
-        return homework_statuses.json()
-    except Exception:
-        logger.exception('Ошибка')
+            params={'from_date': 0})
+    except ValueError as e:
+        logging.error(e, exc_info=True)
+    except requests.HTTPError as e:
+        logging.error(e, exc_info=True)
+    except requests.ConnectionError as e:
+        logging.error(e, exc_info=True)
+    except requests.Timeout as e:
+        logging.error(e, exc_info=True)
+    except requests.RequestException as e:
+        logging.error(e, exc_info=True)
+    return homework_statuses.json()
 
 
 def send_message(message, bot_client):
@@ -55,9 +62,12 @@ def send_message(message, bot_client):
 
 
 def main():
+    logger = logging.getLogger(__name__)
+    console_handler = logging.StreamHandler()
+    logger.addHandler(console_handler)
     current_timestamp = int(time.time())
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    logging.debug('Бот запустился!')
+    logger.debug('Бот запустился!')
     while True:
         try:
             new_homework = get_homework_statuses(current_timestamp)
@@ -70,7 +80,8 @@ def main():
                                                  current_timestamp)
             time.sleep(300)
         except Exception as e:
-            send_message(f'Бот столкнулся с ошибкой: {e}', bot)
+            logging.exception(f'Бот столкнулся с ошибкой: {e}', exc_info=True)
+            send_message(f'Бот столкнулся с ошибкой: {e}', bot, exc_info=True)
             time.sleep(5)
 
 
