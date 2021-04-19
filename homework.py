@@ -44,17 +44,13 @@ def get_homework_statuses(current_timestamp):
             PRAKTIKUM_URL,
             headers={'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'},
             params={'from_date': current_timestamp})
+        return homework_statuses.json()
     except ValueError as e:
-        logging.error(e, exc_info=True)
-    except requests.HTTPError as e:
-        logging.error(e, exc_info=True)
-    except requests.ConnectionError as e:
-        logging.error(e, exc_info=True)
-    except requests.Timeout as e:
-        logging.error(e, exc_info=True)
-    except requests.RequestException as e:
-        logging.error(e, exc_info=True)
-    return homework_statuses.json()
+        logging.exception(f'Ошибка значения {e}')
+        return {}
+    except requests.exceptions.RequestException as e:
+        logging.exception(f'Ошибка запроса {e}')
+        return {}
 
 
 def send_message(message, bot_client):
@@ -80,8 +76,8 @@ def main():
                                                  current_timestamp)
             time.sleep(300)
         except Exception as e:
-            logging.exception(f'Бот столкнулся с ошибкой: {e}', exc_info=True)
-            send_message(f'Бот столкнулся с ошибкой: {e}', bot, exc_info=True)
+            logging.exception(f'Бот столкнулся с ошибкой: {e}')
+            send_message(f'Бот столкнулся с ошибкой {e}', bot)
             time.sleep(5)
 
 
