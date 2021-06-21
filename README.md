@@ -15,6 +15,6 @@ python-telegram-bot 12.7
 <li>Активируйте виртуальное окружение: (Windows: source venv\scripts\activate; Linux/Mac: source venv/bin/activate)</li>
   <li>Установите зависимости: pip install -r requirements.txt</li>
 <h3>Для работы боту требуется файл .env со следующими переменными окружения:</h3>
-<li>PRACTICUM_TOKEN=YOUR_PRACTICUM_TOKEN # Токен, полученный на платформе Яндекс.Практикум</li>
-<li>TELEGRAM_TOKEN=YOUR_TELEGRAM_TOKEN # Токен вашего бота, полученный через @BotFather</li>
-<li>TELEGRAM_CHAT_ID=YOUR_TELEGRAM_CHAT_ID # Ваш Chat_id</li>
+<li>PRAKTIKUM_TOKEN - Токен, полученный на платформе Яндекс.Практикум</li>
+<li>TELEGRAM_TOKEN - Токен вашего бота, полученный через @BotFather</li>
+<li>TELEGRAM_CHAT_ID - Ваш Chat_id</li>
