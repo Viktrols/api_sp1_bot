@@ -7,7 +7,7 @@
 Бот разработан в учебных целях на курсе Python-разработчик от Yandex.Praktikum.
 
 <h3>Используемые технологии</h3>
-Python 3.8
+Python 3.8<br>
 python-telegram-bot 12.7
 <h2>Установка</h2>
 <li>Клонируйте репозиторий на локальную машину: git clone https://github.com/Viktrols/api_sp1_bot.git</li>
